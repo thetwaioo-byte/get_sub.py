@@ -7,6 +7,7 @@ import sys
 import os
 import re
 import json
+import time
 from collections import defaultdict
 from datetime import datetime
 
@@ -25,18 +26,16 @@ class Colors:
     GREEN = '\033[92m'
     YELLOW = '\033[93m'
     RED = '\033[91m'
-    WHITE = '\033[97m'
     END = '\033[0m'
     BOLD = '\033[1m'
 
-# ═══════════════ အသုံးပြုသည့် လုပ်ဆောင်ချက်များ ═══════════════
 def clear_screen():
     os.system('cls' if os.name == 'nt' else 'clear')
 
 def extract_country(text):
-    match = re.search(r'[🇦-🇿]\s*([A-Za-z\s]+)|-\s*([A-Za-z\s,]+)$', text)
+    match = re.search(r'#([A-Za-z\s,]+)$', text)
     if match:
-        return match.group(1) or match.group(2)
+        return match.group(1).strip()
     return "အခြား"
 
 def extract_server_name(line):
@@ -58,7 +57,7 @@ def save_to_history(content):
         })
         with open(FILE_HIST, "w", encoding="utf-8") as f:
             json.dump(history[-50:], f, ensure_ascii=False, indent=2)
-    except:
+    except Exception:
         pass
 
 def check_updates():
@@ -70,14 +69,14 @@ def check_updates():
         new_content = base64.b64decode(new_encoded).decode("utf-8") if new_encoded else ""
         
         if not os.path.exists(FILE_MAIN):
-            print(f"{Colors.GREEN}✅ ဒေတာအသစ် ရှိနေသည်! ကျေးဇူးပြု၍ 'ဒေတာအသစ်ရယူပါ' ကိုရွေးပါ{Colors.END}")
+            print(f"{Colors.GREEN}✅ ဒေတာအသစ် ရှိနေသည်! 'ဒေတာအသစ်ရယူပါ' ကိုရွေးပါ{Colors.END}")
             return True
         
         with open(FILE_MAIN, "r", encoding="utf-8") as f:
             old_content = f.read()
         
         if new_content.strip() != old_content.strip():
-            print(f"{Colors.GREEN}✅ ဒေတာအသစ်ထွက်နေသည်! 'ဒေတာအသစ်ရယူပါ' ဖြင့်မွမ်းမံပါ{Colors.END}")
+            print(f"{Colors.GREEN}✅ ဒေတာအသစ်ထွက်နေသည်! မွမ်းမံပါ{Colors.END}")
             return True
         else:
             print(f"{Colors.YELLOW}⏰ နောက်ဆုံးပေါ်ဖြစ်နေပါသည်{Colors.END}")
@@ -86,10 +85,9 @@ def check_updates():
         print(f"{Colors.RED}❌ စစ်ဆေး၍မရပါ: {e}{Colors.END}")
         return False
 
-# ═════════════== ပငမ လုပ်ဆောင်ချက်များ ═══════════════
 def fetch_data():
     print(f"{Colors.CYAN}🔄 အချက်အလက်များ ရယူနေသည်...{Colors.END}")
-       try:
+    try:
         req = urllib.request.Request(URL, headers={'User-Agent': 'Mozilla/5.0'})
         with urllib.request.urlopen(req, timeout=15) as res:
             encoded = res.read().decode("utf-8").strip()
@@ -101,7 +99,7 @@ def fetch_data():
         
         save_to_history(decoded)
         
-        lines = = decoded.splitlines()
+        lines = decoded.splitlines()
         print(f"{Colors.GREEN}✅ အောင်မြင်စွာ ရယူပြီး သိမ်းဆည်းပြီးပါပြီ!{Colors.END}")
         print(f"📄 စုစုပေါင်း လိုင်းအရေအတွက်: {Colors.BOLD}{len(lines)}{Colors.END}")
         return decoded
@@ -131,8 +129,8 @@ def count_and_show():
         print(f"{Colors.YELLOW}⚠️ ဖိုင်မရှိသေးပါ။ အရင် ဒေတာအသစ်ရယူပါ။{Colors.END}")
         return
     with open(FILE_MAIN, "r", encoding="utf-8") as f:
-        lines = = [l.strip() for l in f.read().splitlines() if l.strip()]
-    ss_links = = [l for l in lines if l.startswith("ss://")]
+        lines = [l.strip() for l in f.read().splitlines() if l.strip()]
+    ss_links = [l for l in lines if l.startswith("ss://")]
     
     print(f"{Colors.GREEN}🔢 စာရင်းဇယား:{Colors.END}")
     print(f"စုစုပေါင်း လိုင်းအရေအတွက်: {len(lines)}")
@@ -146,8 +144,8 @@ def search_data():
         return
     keyword = input(f"{Colors.CYAN}🔍 ရှာဖွေလိုသော စာသား/နိုင်ငံအမည် ရိုက်ထည့်ပါ: {Colors.END}")
     with open(FILE_MAIN, "r", encoding="utf-8") as f:
-        lines = = f.read().splitlines()
-    found = = [l for l in lines if keyword.lower() in l.lower()]
+        lines = f.read().splitlines()
+    found = [l for l in lines if keyword.lower() in l.lower()]
     if found:
         print(f"\n{Colors.GREEN}✅ တွေ့ရှိချက် ({len(found)} ခု):{Colors.END}")
         for i, item in enumerate(found, 1):
@@ -161,7 +159,7 @@ def copy_all():
         print(f"{Colors.YELLOW}⚠️ ဖိုင်မရှိသေးပါ။ အရင် ဒေတာအသစ်ရယူပါ။{Colors.END}")
         return
     with open(FILE_MAIN, "r", encoding="utf-8") as f:
-        content = = f.read()
+        content = f.read()
     print(f"{Colors.GREEN}📋 အောက်ပါအတိုင်း ကူးယူအသုံးပြုပါ:{Colors.END}\n")
     print("━" * 60)
     print(content)
@@ -169,13 +167,12 @@ def copy_all():
     print(f"{Colors.YELLOW}⚠️ အပေါ်က စာသားအားလုံးကို ကိုယ်တိုင်ကူးယူပါ{Colors.END}")
     input(f"{Colors.CYAN}ပြန်မယူဖို့ ခလုတ်တစ်ခုခုနှိပါ...{Colors.END}")
 
-# ====== A: နိုင်ငံအလိုက် စီစဉ်ပြခြင်း ======
 def group_by_country():
     if not os.path.exists(FILE_MAIN):
         print(f"{Colors.YELLOW}⚠️ ဖိုင်မရှိသေးပါ။ အရင် ဒေတာအသစ်ရယူပါ။{Colors.END}")
         return
     with open(FILE_MAIN, "r", encoding="utf-8") as f:
-        lines = = [l.strip() for l in f.read().splitlines() if l.strip() and l.startswith("ss://")]
+        lines = [l.strip() for l in f.read().splitlines() if l.strip() and l.startswith("ss://")]
     
     groups = defaultdict(list)
     for line in lines:
@@ -192,13 +189,12 @@ def group_by_country():
     
     input(f"{Colors.CYAN}ပြန်မယူဖို့ ခလုတ်တစ်ခုခုနှိပါ...{Colors.END}")
 
-# ====== B: သီးခြားဖိုင်သို့ သိမ်းဆည်းခြင်း ======
 def save_selected():
     if not os.path.exists(FILE_MAIN):
         print(f"{Colors.YELLOW}⚠️ ဖိုင်မရှိသေးပါ။ အရင် ဒေတာအသစ်ရယူပါ။{Colors.END}")
         return
     with open(FILE_MAIN, "r", encoding="utf-8") as f:
-        lines = = [l.strip() for l in f.read().splitlines() if l.strip()]
+        lines = [l.strip() for l in f.read().splitlines() if l.strip()]
     
     print(f"{Colors.CYAN}📋 လင့်ခ်စာရင်းများ (နံပါတ်ရွေးပါ၊ အများအပြား=ကော်မာခြား ဥပမာ: 1,3,5):{Colors.END}\n")
     for i, line in enumerate(lines, 1):
@@ -229,20 +225,17 @@ def view_my_list():
             print(f.read())
     input(f"{Colors.CYAN}ပြန်မယူဖို့ ခလုတ်တစ်ခုခုနှိပါ...{Colors.END}")
 
-# ====== C: လင့်ခ်အသက်ဝင်မှု စစ်ဆေးခြင်း ======
 def check_link_alive():
     if not os.path.exists(FILE_MAIN):
         print(f"{Colors.YELLOW}⚠️ ဖိုင်မရှိသေးပါ။ အရင် ဒေတာအသစ်ရယူပါ။{Colors.END}")
         return
     
     with open(FILE_MAIN, "r", encoding="utf-8") as f:
-        lines = = [l.strip() for l in f.read().splitlines() if l.strip() and l.startswith("ss://")]
+        lines = [l.strip() for l in f.read().splitlines() if l.strip() and l.startswith("ss://")]
     
-    print(f"{Colors.CYAN}🔌 လင့်ခ်များ စစ်ဆေးနေသည်... (အချိန်ကြာနိုင်ပါသည်){Colors.END}\n")
+    print(f"{Colors.CYAN}🔌 လင့်ခ်များ စစ်ဆေးနေသည်...{Colors.END}\n")
     print(f"{Colors.GREEN}🟢 = အသက်ဝင်သည်  |  {Colors.YELLOW}🟡 = မသိရှိနိုင်  |  {Colors.RED}🔴 = မအလုပ်လုပ်ပါ{Colors.END}\n")
-    
-    print(f"{Colors.YELLOW}⚠️ SS လင့်ခ်များကို တိုက်ရိုက်ချိတ်ဆက်စစ်ဆေး၍မရပါ။ ပုံမှန်အားဖြင့် အသက်ဝင်နေသည်ဟု မှတ်ယူပါ။{Colors.END}")
-    print(f"{Colors.GREEN}🟢 SS ပရိုတိုကော လင့်ခ် = အသက်ဝင်နေသည်ဟု မှတ်ယူပါသည်{Colors.END}\n")
+    print(f"{Colors.YELLOW}⚠️ SS လင့်ခ်များကို တိုက်ရိုက်မစစ်ဆေးနိုင်ပါ။ ပုံမှန်အားဖြင့် အသက်ဝင်နေသည်ဟု မှတ်ယူပါ။{Colors.END}\n")
     
     for i, line in enumerate(lines[:10], 1):
         name = extract_server_name(line)
@@ -253,13 +246,12 @@ def check_link_alive():
     
     input(f"{Colors.CYAN}\nပြန်မယူဖို့ ခလုတ်တစ်ခုခုနှိပါ...{Colors.END}")
 
-# ====== D: တင်ပို့ခြင်း ======
 def export_json():
     if not os.path.exists(FILE_MAIN):
         print(f"{Colors.YELLOW}⚠️ ဖိုင်မရှိသေးပါ။ အရင် ဒေတာအသစ်ရယူပါ။{Colors.END}")
         return
     with open(FILE_MAIN, "r", encoding="utf-8") as f:
-        lines = = [l.strip() for l in f.read().splitlines() if l.strip()]
+        lines = [l.strip() for l in f.read().splitlines() if l.strip()]
     
     data = {
         "export_time": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
@@ -270,7 +262,7 @@ def export_json():
     with open(FILE_EXPORT_JSON, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
     
-    print(f"{Colors.GREEN}✅ JSON ဖိုင်အဖြစ် '{FILE_EXPORT_JSON}' သို့တင်ပို့ပြီးပါပြီ{Colors.END}")
+    print(f"{Colors.GREEN}✅ JSON ဖိုင်အဖြစ် တင်ပို့ပြီးပါပြီ{Colors.END}")
     input(f"{Colors.CYAN}ပြန်မယူဖို့ ခလုတ်တစ်ခုခုနှိပါ...{Colors.END}")
 
 def export_csv():
@@ -278,7 +270,7 @@ def export_csv():
         print(f"{Colors.YELLOW}⚠️ ဖိုင်မရှိသေးပါ။ အရင် ဒေတာအသစ်ရယူပါ။{Colors.END}")
         return
     with open(FILE_MAIN, "r", encoding="utf-8") as f:
-        lines = = [l.strip() for l in f.read().splitlines() if l.strip()]
+        lines = [l.strip() for l in f.read().splitlines() if l.strip()]
     
     with open(FILE_EXPORT_CSV, "w", encoding="utf-8") as f:
         f.write("Server Name,Link\n")
@@ -286,10 +278,9 @@ def export_csv():
             name = extract_server_name(line).replace(",", " -")
             f.write(f'"{name}","{line}"\n')
     
-    print(f"{Colors.GREEN}✅ CSV ဖိုင်အဖြစ် '{FILE_EXPORT_CSV}' သို့တင်ပို့ပြီးပါပြီ{Colors.END}")
+    print(f"{Colors.GREEN}✅ CSV ဖိုင်အဖြစ် တင်ပို့ပြီးပါပြီ{Colors.END}")
     input(f"{Colors.CYAN}ပြန်မယူဖို့ ခလုတ်တစ်ခုခုနှိပါ...{Colors.END}")
 
-# ====== E: အကြိုက်ဆုံး/အမှတ်အသား ======
 def load_favorites():
     if os.path.exists(FILE_FAV):
         with open(FILE_FAV, "r", encoding="utf-8") as f:
@@ -306,7 +297,7 @@ def toggle_favorite():
         print(f"{Colors.YELLOW}⚠️ ဖိုင်မရှိသေးပါ။ အရင် ဒေတာအသစ်ရယူပါ။{Colors.END}")
         return
     with open(FILE_MAIN, "r", encoding="utf-8") as f:
-        lines = = [l.strip() for l in f.read().splitlines() if l.strip()]
+        lines = [l.strip() for l in f.read().splitlines() if l.strip()]
     
     favs = load_favorites()
     
@@ -342,12 +333,10 @@ def view_favorites():
             print(f"  [{i}] {item}")
     input(f"{Colors.CYAN}ပြန်မယူဖို့ ခလုတ်တစ်ခုခုနှိပါ...{Colors.END}")
 
-# ====== F: အလိုအလျောက် စစ်ဆေးခြင်း ======
 def auto_check_updates():
     check_updates()
     input(f"{Colors.CYAN}ပြန်မယူဖို့ ခလုတ်တစ်ခုခုနှိပါ...{Colors.END}")
 
-# ====== G: မှတ်တမ်းသမိုင်း ======
 def view_history():
     if not os.path.exists(FILE_HIST):
         print(f"{Colors.YELLOW}⚠️ မှတ်တမ်းမရှိသေးပါ{Colors.END}")
@@ -362,37 +351,36 @@ def view_history():
                 print(f"  [{idx}] {rec['time']} → {rec['lines']} လိုင်း")
     input(f"{Colors.CYAN}ပြန်မယူဖို့ ခလုတ်တစ်ခုခုနှိပါ...{Colors.END}")
 
-# ═════════════== ပင်မ Menu ═══════════════
 def main_menu():
     while True:
         clear_screen()
         print(f"""{Colors.HEADER}
 ╔═══════════════════════════════════════════════════╗
-║          🚀 Sub Downloader  v3.0  (အပြည့်အစုံ)         ║
+║          🚀 Sub Downloader  v3.0                  ║
 ╠═══════════════════════════════════════════════════╣
-║  📥 အခြေခံ လုပ်ဆောင်ချက်များ:                          ║
+║  📥 အခြေခံ လုပ်ဆောင်ချက်များ:                      ║
 ║   1. ဒေတာအသစ်ပြန်ရယူပါ                              ║
 ║   2. လက်ရှိဒေတာကို ကြည့်ပါ                           ║
 ║   3. စာရင်းဇယား ကြည့်ပါ                              ║
-║   4. နိုင်ငံအလိုက် စီစဉ်ကြည့်ပါ (A)                     ║
+║   4. နိုင်ငံအလိုက် စီစဉ်ကြည့်ပါ                       ║
 ║   5. နိုင်ငံ/လင့်ခ် ရှာဖွေပါ                           ║
 ║   6. အားလုံးကူးယူဖို့ ပြပါ                              ║
 ║                                                   ║
 ║  ⭐ အကြိုက်ဆုံး & သိမ်းဆည်းခြင်း:                       ║
-║   7. လင့်ခ်ရွေးပြီး သိမ်းဆည်းပါ (B)                    ║
+║   7. လင့်ခ်ရွေးပြီး သိမ်းဆည်းပါ                      ║
 ║   8. ကျွန်ုပ်၏စာရင်းကို ကြည့်ပါ                       ║
-║   9. အကြိုက်ဆုံးအဖြစ် အမှတ်အသားပြုပါ (E)                ║
+║   9. အကြိုက်ဆုံးအဖြစ် အမှတ်အသားပြုပါ                    ║
 ║  10. အကြိုက်ဆုံးစာရင်း ကြည့်ပါ                        ║
 ║                                                   ║
 ║  📤 တင်ပို့ခြင်း & စစ်ဆေးခြင်း:                        ║
-║  11. လင့်ခ်အသက်ဝင်မှု စစ်ဆေးပါ (C)                    ║
-║  12. JSON အဖြစ်တင်ပို့ပါ (D)                          ║
-║  13. CSV အဖြစ်တင်ပို့ပါ (D)                           ║
+║  11. လင့်ခ်အသက်ဝင်မှု စစ်ဆေးပါ                      ║
+║  12. JSON အဖြစ်တင်ပို့ပါ                            ║
+║  13. CSV အဖြစ်တင်ပို့ပါ                             ║
 ║                                                   ║
 ║  🔍 အခြားအသုံးဝင်သည့်အရာများ:                         ║
-║  14. အသစ်ရှိလား စစ်ဆေးပါ (F)                          ║
-║  15. မှတ်တမ်းသမိုင်း ကြည့်ပါ (G)                      ║
-║  16. ဖိုင်ကိုဖျက်ပါ                                    ║
+║  14. အသစ်ရှိလား စစ်ဆေးပါ                            ║
+║  15. မှတ်တမ်းသမိုင်း ကြည့်ပါ                        ║
+║  16. ဖိုင်အားလုံးကိုဖျက်ပါ                              ║
 ║   0. ပရိုဂရမ်မှ ထွက်ပါ                                ║
 ╠═══════════════════════════════════════════════════╣
 ║  💡 နံပါတ်ရိုက်ပြီး Enter နှိပ်ပါ                      ║
@@ -402,8 +390,7 @@ def main_menu():
         
         if choice == "1":
             fetch_data()
-            print(f"\n⏳ ခဏစောင့်ပါ...")
-            import time; time.sleep(1.5)
+            time.sleep(1.5)
         elif choice == "2":
             show_data()
         elif choice == "3":
@@ -444,7 +431,8 @@ def main_menu():
             sys.exit(0)
         else:
             print(f"{Colors.RED}❌ မှားနေပါတယ်။ 0-16 ကြား နံပါတ်သာရိုက်ပါ{Colors.END}")
-            import time; time.sleep(1.5)
+            time.sleep(1.5)
 
 if __name__ == "__main__":
     main_menu()
+            
