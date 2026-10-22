@@ -31,9 +31,6 @@ class Colors:
     GRAY = '\033[90m'
     BOLD = '\033[1m'
     DIM = '\033[2m'
-    ITALIC = '\033[3m'
-    UNDERLINE = '\033[4m'
-    REVERSE = '\033[7m'
     END = '\033[0m'
 
 class Styles:
@@ -254,7 +251,7 @@ def view_my_list():
     else:
         print(f"{Styles.PIPE}  {Colors.GREEN}💾 သိမ်းဆည်းထားသည့်လင့်ခ်များ-{Colors.END}".ljust(40) + Styles.PIPE)
         print(f"{Styles.LINE_MID}")
-               with open(FILE_MY, "r", encoding="utf-8") as f:
+        with open(FILE_MY, "r", encoding="utf-8") as f:
             print(f.read())
     print_footer()
     input(f"{Colors.CYAN}⏎ ပြန်မယူဖို့ ခလုတ်တစ်ခုခုနှိပါ...{Colors.END}")
@@ -405,7 +402,7 @@ def main_menu():
         
         print(f"{Colors.MAGENTA}╔═══════════════════════════════════════════╗{Colors.END}")
         print(f"{Colors.MAGENTA}║{Colors.CYAN}{Colors.BOLD}           🚀  SUB DOWNLOADER              {Colors.END}{Colors.MAGENTA}║{Colors.END}")
-        print(f"{Colors.MAGENTA}║{Colors.DIM}         Premium Edition  v3.1            {Colors.END}{Colors.MAGENTA}║{Colors.END}")
+        print(f"{Colors.MAGENTA}║{Colors.DIM}         Premium Edition  v3.2            {Colors.END}{Colors.MAGENTA}║{Colors.END}")
         print(f"{Colors.MAGENTA}╠═══════════════════════════════════════════╣{Colors.END}")
         print(f"{Colors.MAGENTA}║{Colors.CYAN}  📥 အခြေခံ လုပ်ဆောင်ချက်များ{Colors.END}{' ' * 18}{Colors.MAGENTA}║{Colors.END}")
         print(f"{Colors.MAGENTA}║{Colors.WHITE}   1. ဒေတာအသစ်ပြန်ရယူပါ              {' ' * 11}{Colors.MAGENTA}║{Colors.END}")
